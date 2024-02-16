@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()){
+fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
 
@@ -56,11 +56,11 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
             icon = painterResource(id = R.drawable.fill_star)
         )
     )
-    var page by remember{
+    var page by remember {
         mutableStateOf(menus[0])
     }
 
-    if(viewModel.openSearch.value){
+    if (viewModel.openSearch.value) {
         ShowDialog(openDialog = viewModel.openSearch) {
             SearchDialog(controller = viewModel.openSearch, valueState = viewModel.keyword) {
                 viewModel.openSearch.value = false
@@ -70,27 +70,40 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
     }
 
 
-    
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.app_name))},
+                title = {
+                    Text(
+                        text = stringResource(
+                            when (page.id) {
+                                Constants.NOW_PLAYING_PATH -> R.string.now_playing
+                                Constants.POPULAR_PATH -> R.string.popular
+                                Constants.UPCOMING_PATH -> R.string.upcoming
+                                else -> R.string.favorite
+                            }
+                        )
+                    )
+                },
                 backgroundColor = MaterialTheme.colors.primary,
                 contentColor = MaterialTheme.colors.onPrimary,
-                navigationIcon = { IconButton(onClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.open()
-                    }
-                }){
+                navigationIcon = {
+                    IconButton(onClick = {
+                        scope.launch {
+                            scaffoldState.drawerState.open()
+                        }
+                    }) {
 
-                    Icon(
-                        imageVector = Icons.Default.Menu,
-                        contentDescription = "Toggle drawer"
-                    )
-                } },
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Toggle drawer"
+                        )
+                    }
+                },
                 actions = {
-                    IconButton(onClick = { 
+                    IconButton(onClick = {
                         viewModel.openSearch.value = true
                     }) {
                         Icon(
@@ -98,36 +111,38 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                             contentDescription = "Search Action"
                         )
                     }
-                    
+
                 }
             )
         },
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
         drawerContent = {
-        DrawerHeader()
-        DrawerBody(menus = menus, onItemClick = {
-            scope.launch {
-                scaffoldState.drawerState.close()
-            }
-            viewModel.keyword.value = ""
-            page = it
-            println("clicked page ${it.title}")
-        },
-        )
-    }){
+            DrawerHeader()
+            DrawerBody(
+                menus = menus,
+                onItemClick = {
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                    viewModel.keyword.value = ""
+                    page = it
+                    println("clicked page ${it.title}")
+                },
+            )
+        }) {
 
 
-        when(page.id){
-            Constants.NOW_PLAYING_PATH ->{
+        when (page.id) {
+            Constants.NOW_PLAYING_PATH -> {
                 NowPlayingFragment(viewModel, navController)
             }
-            Constants.POPULAR_PATH ->{
+            Constants.POPULAR_PATH -> {
                 PopularFragment(viewModel, navController)
             }
-            Constants.UPCOMING_PATH ->{
+            Constants.UPCOMING_PATH -> {
                 UpcomingFragment(viewModel, navController)
             }
-            Constants.FAVORITES_PATH ->{
+            Constants.FAVORITES_PATH -> {
                 FavoritesFragment(viewModel, navController)
             }
         }
